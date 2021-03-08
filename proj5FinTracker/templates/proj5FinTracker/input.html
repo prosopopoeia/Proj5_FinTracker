@@ -1,0 +1,30 @@
+{% extends "proj5FinTracker/layout.html" %}
+{% load static %}
+
+
+
+
+{% block body %}
+<div  class="container">
+	<h2>Input Bank Statements/Documents</h2>	
+	
+	<div class="form-group">
+		<form id="input-form" method="post" action="{% url 'vupload' %}" enctype="multipart/form-data">
+			{{ tform.as_p }}
+			{% csrf_token %}
+			<input type="hidden" id="unfound" value="{{ dmp }}" />
+			
+				
+		</form>
+		<button type="submit" id="input-form-button" form="input-form" class="btn btn-primary" value="Submit">Submit</button>
+	</div>	
+	<div>msg3: {{ msg3 }} <br> msg4: {{ msg4 }}</div>
+	<div>msg5: {{ msg5 }} <br> msg6: {{ msg6 }}</div>
+	
+{% endblock %}
+
+{% block script %}
+	 <script src="{% static 'FinTracker/input.js' %}"
+	 ></script>
+	 <!-- <script>var duta = JSON.parse("{{dmp|escapejs}}"); </script> -->
+{% endblock %}

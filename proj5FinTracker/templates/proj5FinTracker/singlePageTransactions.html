@@ -1,0 +1,115 @@
+{% extends "proj5FinTracker/layout.html" %}
+{% load static %}
+
+{% block whiteli %}	
+	
+	<li id='navyear'><a href="#">Year View</a></li>	
+	<li id='navepoch'><a href="#">Epoch View</a></li>
+	
+
+{% endblock %}
+
+{% block body %}
+
+<br />
+<div class="container-fluid">
+	
+	<div class="row">
+		<div class="col-xs-6">
+				<div class="form-group container-fluid" id="findby-form">
+					<form id="search-bymonth-form" method="post">
+						<label for="month_year">Transaction Period</label>
+						<input type="date" id="bydate" name="month_year" />
+						<br /><br />
+						{% csrf_token %}
+					
+					</form>
+					<button type="submit" id="search-bymonth-button" form="search-bymonth-form" class="btn btn-primary" value="Submit">Submit</button>
+				</div>	
+				<br /> <br />
+				<div class="form-group" id="add-form-group">
+					<button type="submit" id="add-trans-button" class="btn btn-primary" value="Add">Add Transaction</button>
+					
+					<div id="add-trans">
+						<form id="add-trans-form" method="post">
+						{{ trans_form.as_p }}
+						{% csrf_token %}
+						<input type="submit" value="Add" id="add-btn" class="btn btn-primary"/>
+						</form>
+					</div>
+				</div>
+				
+		</div>
+		
+		<div class="col-xs-4">
+			<h2><strong><a href="#">	<span id="date-span"> {{ vdate_info }} </span></a></strong></h2>
+		</div>
+	
+	</div>
+		
+</div>
+<br />
+
+
+<div class="container-fluid">
+	
+		
+		<div id="leftPanel" class="col-xs-6">
+		<h3><div class="panel alert alert-info panel-primary" id='cat-grp'></div></h3>
+		  <table class="table table-bordered table-striped">
+			  <thead>
+				<tr>
+					<th>Edit</th>
+					<th>Date</th>
+					<th>Description</th>
+					<th>Amount</th>
+					<th>Category</th>
+					<th>Group</th>
+				</tr>
+			  </thead>
+			  <tbody id='target'>
+			  </tbody>
+		  </table>
+		</div>
+		<div id="aggregates" class="col-xs-4">
+			<h4><div class="panel alert alert-info panel-primary" id='amt-saved'></div></h4>
+			<div id="detail-table1">
+				<table class="table table-bordered">
+				    <thead>
+				      <tr>
+					    <th>Debits - Grand Total:</th><th id="tot-deb"></th>
+					  </tr>
+				    </thead>
+					<tbody id='debit-overview'></tbody>
+				</table>
+			</div>
+			
+			<div id="debit-pie"></div>
+
+			<div id="detail-table2">
+				<table class="table table-bordered">
+					<thead>
+				      <tr>
+					    <th>Credits - Grand Total:</th><th id="tot-cred"></th>
+					  </tr>
+				    </thead>
+					<tbody id='credit-overview'></tbody>
+				</table>
+			</div>
+			
+			<div id="credit-pie"></div>
+			<div id="char-view-div"><button id="chart-view-btn"></button></div>
+		</div>
+	
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>	
+	
+	<script src="{% static 'FinTracker/sstrans.js' %}"></script>
+		
+	
+{% endblock %}
