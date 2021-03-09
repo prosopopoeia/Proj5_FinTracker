@@ -328,51 +328,29 @@ def vinput(request):
                      
 @csrf_exempt
 def vupload(request):    
-  
-    # def vupload(request):    
-  
-    # ###get text from PDF document###
-    # bf_str = StringIO()
-    # bf_open = request.FILES['file_name']
-    # bf_parser = PDFParser(bf_open)
-    # bf_doc = PDFDocument(bf_parser)
-    # bf_mgr = PDFResourceManager()
-    # bf_converter = TextConverter(bf_mgr, bf_str, laparams=LAParams())
-    # bf_interpreter = PDFPageInterpreter(bf_mgr, bf_converter)
-    # for bf_page in PDFPage.create_pages(bf_doc):
-        # bf_interpreter.process_page(bf_page)
     
-    
-    # transactions_needing_classification = parse_pdf_text(bf_str.getvalue(), request)
-    
-    # ibsForm = InputBankStatementForm()
-    # dmp = dumps(transactions_needing_classification)
-    # return render(request, "proj5FinTracker/input.html", {
-        # 'tform' : ibsForm,
-        # 'dmp': dmp  
-    # })
-  
-  
     ###parse CSV###
     
     ###parse PDF document###
     bf_str = StringIO()
     bf_open = request.FILES['file_name']
-    if ('PDF' in bf_open.name.upper()): 
-        bf_parser = PDFParser(bf_open)
-        bf_doc = PDFDocument(bf_parser)
-        bf_mgr = PDFResourceManager()
-        bf_converter = TextConverter(bf_mgr, bf_str, laparams=LAParams())
-        bf_interpreter = PDFPageInterpreter(bf_mgr, bf_converter)
-        for bf_page in PDFPage.create_pages(bf_doc):
-            bf_interpreter.process_page(bf_page)
+    # if ('PDF' in bf_open.name.upper()): 
+        # bf_parser = PDFParser(bf_open)
+        # bf_doc = PDFDocument(bf_parser)
+        # bf_mgr = PDFResourceManager()
+        # bf_converter = TextConverter(bf_mgr, bf_str, laparams=LAParams())
+        # bf_interpreter = PDFPageInterpreter(bf_mgr, bf_converter)
+        # for bf_page in PDFPage.create_pages(bf_doc):
+            # bf_interpreter.process_page(bf_page)
         
-        transactions_needing_classification = parse_pdf_text(bf_str.getvalue(), request)
+        # transactions_needing_classification = parse_pdf_text(bf_str.getvalue(), request)
         
-    else:
-        transactions_needing_classification = parse_csv(bf_open, request)
-        
+    # else:
     
+    fs =  FileStorage()
+    fs.financial_doc  = bf_open
+    fs.save()
+    transactions_needing_classification = parse_csv(bf_open, request)    
     dmp = dumps(transactions_needing_classification)
     ibsForm = InputBankStatementForm()
     return render(request, "proj5FinTracker/input.html", {
@@ -386,141 +364,6 @@ def vupload(request):
 def get_user(request):
     return User.objects.get(username = request.session["current_user"])
   
-  
-def parse_pdf_text(pdf_text, request):
-    
-    transaction_pattern = '\d\d/\d\d\s+[\d,]+\.\d{2}\s+.+?\w\w\s+\d{6}\s+?'
-    pdf_text = pdf_text.replace("'","")
-    
-    ###SAVINGS Section###
-    savings_index = pdf_text.find('SAVINGS ACCOUNT')
-    checking_index = pdf_text.find('POLL CHECKING')
-    savings_string = pdf_text[savings_index:checking_index]
-    
-    start_index = savings_string.find('DEPOSITS/CREDITS')
-    end_index = savings_string.find('WITHDRAWALS/DEBITS')
-    
-    scredit_block = savings_string[start_index:end_index]    
-    scredit_result = process_transactions(scredit_block, transaction_pattern)
-        
-    sdebit_block = savings_string[end_index:checking_index]
-    
-    sdebit_result = process_transactions(sdebit_block, transaction_pattern)    
-         
-    ###CHECKING SECTION###
-    
-    #s_end = pdf_text.find('POLL CHECKING')
-    checking_string = pdf_text[checking_index:]
-    deposit_index = checking_string.find('DEPOSITS/CREDITS')
-    atmwithdrawal_index = checking_string.find('ATM WITHDRAWALS/DEBIT PURCHASES')
-    withdrawal_index = checking_string.find('WITHDRAWALS/DEBITS')
-    end_statement_index = checking_string.find('* * * REWARDS:')
-    
-    ##credit section
-    ccredit_block = checking_string[deposit_index:atmwithdrawal_index]
-    ccredit_result = process_transactions(ccredit_block, transaction_pattern)
-    
-    ##ATM withdrawal section
-    cdebit_block1 = checking_string[atmwithdrawal_index:withdrawal_index]
-    cATMDebit_result = process_transactions(cdebit_block1, transaction_pattern)
-    
-    ##withdrawal section
-    cdebit_block2 = checking_string[withdrawal_index:end_statement_index]
-    c_withdrawal_result = process_transactions(cdebit_block2, transaction_pattern)
-
-    result = [scredit_result, ccredit_result, sdebit_result, cATMDebit_result, c_withdrawal_result]
-    #finds first date at head, format: mm/dd/yy to mm/dd/yy
-    statement_date_match = re.search('\d\d/\d\d/\d\d\sto\s\d\d/\d\d/\d\d',pdf_text)  
-    statement_date = statement_date_match.group(0)
-    statement_year = '20' + statement_date[6:8]
-    if statement_date[6:8] != statement_date[18:]:
-        is_year_end = True
-    else:
-        is_year_end = False
-    uncategorized_entries = record_transactions(result, request, statement_year, is_year_end)
-    
-    return uncategorized_entries
-
-def record_transactions(doc_collection, request, year, is_year_end):
-    
-    c_user = get_user(request)
-    incomplete_transactions = []
-    credit_count = 0
-    for doc in doc_collection:
-        credit_count += 1
-        for i in range(0, len(doc)):
-            adj_year = 0
-            try:                        #match amount: 1,909,000.32 0.03
-                amt_desc_pair = re.split(r'(\d*,?\d*,?\d+\.\d\d)', doc[i + 1])
-                
-                stripped_date = doc[i].strip() #looks like: MM/DD
-                
-                #if this is a dec/jan statement, adjust year if january               
-                if is_year_end and stripped_date[1] == '1': 
-                    adj_year = int(year) + 1
-                    tdate = str(adj_year)
-                else:
-                    #adj_year = int(year)###########################################
-                    tdate  = year
-                tdate += '-'
-                tdate += stripped_date
-                tdate = tdate.replace('/','-')
-                
-                # month = int(stripped_date[:2])
-                # day = int(stripped_date[3:])
-                                
-            except:
-                #doesn't have the pattern of an entry, skip to the next
-                continue
-             
-            try:
-                #see if this a new category
-                
-                bt = BankTransaction.objects.filter(
-                    trans_owner=c_user,
-                    trans_msg = amt_desc_pair[2].strip()
-                    )                
-                #have seen this before, get the category and make the new entry
-                # --- get amount, turn to float, determine if pos or neg
-                tmp_amt = amt_desc_pair[1].replace(",","") #get rid of commas ','
-                transaction_amount = float(tmp_amt)
-                if credit_count > 2:
-                    transaction_amount *= -1
-                
-                #eliminate duplicates:
-                duplicate = False
-                for btransaction in bt:
-                    if transaction_amount == btransaction.trans_amt:
-                        duplicate = True
-                        break
-                        
-                if duplicate:
-                    continue
-                else:
-                    BankTransaction.objects.create(
-                        trans_date=tdate,
-                        trans_owner=c_user,
-                        trans_amt = transaction_amount,
-                        trans_msg = amt_desc_pair[2],
-                        trans_category = bt[0].trans_category,
-                        trans_group = bt[0].trans_group
-                        )
-                    
-            except:
-                #this transaction needs to be categorized by user                
-                try:
-                    if credit_count > 2: #determine if a credit or debit
-                        transaction_amount = '-' + amt_desc_pair[1]
-                    else:
-                        transaction_amount = amt_desc_pair[1]
-                    trans_str = tdate + ' ' + transaction_amount + ' ' + amt_desc_pair[2]
-                    incomplete_transactions.append(trans_str.strip())
-                except:
-                    msg = 'index error 2'
-        
-        
-    return incomplete_transactions
-
 def parse_csv(csv_file, request):
     #CSV Headings: Transaction Date,Check Number,Description,Debit Amount,Credit Amount
     csv_str = str(csv_file.read())
@@ -599,15 +442,150 @@ def parse_csv(csv_file, request):
             incomplete_transactions.append(trans_str.strip())
                         
     return incomplete_transactions
+
+  
+# def parse_pdf_text(pdf_text, request):
+    
+    # transaction_pattern = '\d\d/\d\d\s+[\d,]+\.\d{2}\s+.+?\w\w\s+\d{6}\s+?'
+    # pdf_text = pdf_text.replace("'","")
+    
+    # ###SAVINGS Section###
+    # savings_index = pdf_text.find('SAVINGS ACCOUNT')
+    # checking_index = pdf_text.find('POLL CHECKING')
+    # savings_string = pdf_text[savings_index:checking_index]
+    
+    # start_index = savings_string.find('DEPOSITS/CREDITS')
+    # end_index = savings_string.find('WITHDRAWALS/DEBITS')
+    
+    # scredit_block = savings_string[start_index:end_index]    
+    # scredit_result = process_transactions(scredit_block, transaction_pattern)
+        
+    # sdebit_block = savings_string[end_index:checking_index]
+    
+    # sdebit_result = process_transactions(sdebit_block, transaction_pattern)    
+         
+    # ###CHECKING SECTION###
+    
+    # #s_end = pdf_text.find('POLL CHECKING')
+    # checking_string = pdf_text[checking_index:]
+    # deposit_index = checking_string.find('DEPOSITS/CREDITS')
+    # atmwithdrawal_index = checking_string.find('ATM WITHDRAWALS/DEBIT PURCHASES')
+    # withdrawal_index = checking_string.find('WITHDRAWALS/DEBITS')
+    # end_statement_index = checking_string.find('* * * REWARDS:')
+    
+    # ##credit section
+    # ccredit_block = checking_string[deposit_index:atmwithdrawal_index]
+    # ccredit_result = process_transactions(ccredit_block, transaction_pattern)
+    
+    # ##ATM withdrawal section
+    # cdebit_block1 = checking_string[atmwithdrawal_index:withdrawal_index]
+    # cATMDebit_result = process_transactions(cdebit_block1, transaction_pattern)
+    
+    # ##withdrawal section
+    # cdebit_block2 = checking_string[withdrawal_index:end_statement_index]
+    # c_withdrawal_result = process_transactions(cdebit_block2, transaction_pattern)
+
+    # result = [scredit_result, ccredit_result, sdebit_result, cATMDebit_result, c_withdrawal_result]
+    # #finds first date at head, format: mm/dd/yy to mm/dd/yy
+    # statement_date_match = re.search('\d\d/\d\d/\d\d\sto\s\d\d/\d\d/\d\d',pdf_text)  
+    # statement_date = statement_date_match.group(0)
+    # statement_year = '20' + statement_date[6:8]
+    # if statement_date[6:8] != statement_date[18:]:
+        # is_year_end = True
+    # else:
+        # is_year_end = False
+    # uncategorized_entries = record_transactions(result, request, statement_year, is_year_end)
+    
+    # return uncategorized_entries
+
+# def record_transactions(doc_collection, request, year, is_year_end):
+    
+    # c_user = get_user(request)
+    # incomplete_transactions = []
+    # credit_count = 0
+    # for doc in doc_collection:
+        # credit_count += 1
+        # for i in range(0, len(doc)):
+            # adj_year = 0
+            # try:                        #match amount: 1,909,000.32 0.03
+                # amt_desc_pair = re.split(r'(\d*,?\d*,?\d+\.\d\d)', doc[i + 1])
+                
+                # stripped_date = doc[i].strip() #looks like: MM/DD
+                
+                # #if this is a dec/jan statement, adjust year if january               
+                # if is_year_end and stripped_date[1] == '1': 
+                    # adj_year = int(year) + 1
+                    # tdate = str(adj_year)
+                # else:
+                    # #adj_year = int(year)###########################################
+                    # tdate  = year
+                # tdate += '-'
+                # tdate += stripped_date
+                # tdate = tdate.replace('/','-')
+                
+                # # month = int(stripped_date[:2])
+                # # day = int(stripped_date[3:])
+                                
+            # except:
+                # #doesn't have the pattern of an entry, skip to the next
+                # continue
+             
+            # try:
+                # #see if this a new category
+                
+                # bt = BankTransaction.objects.filter(
+                    # trans_owner=c_user,
+                    # trans_msg = amt_desc_pair[2].strip()
+                    # )                
+                # #have seen this before, get the category and make the new entry
+                # # --- get amount, turn to float, determine if pos or neg
+                # tmp_amt = amt_desc_pair[1].replace(",","") #get rid of commas ','
+                # transaction_amount = float(tmp_amt)
+                # if credit_count > 2:
+                    # transaction_amount *= -1
+                
+                # #eliminate duplicates:
+                # duplicate = False
+                # for btransaction in bt:
+                    # if transaction_amount == btransaction.trans_amt:
+                        # duplicate = True
+                        # break
+                        
+                # if duplicate:
+                    # continue
+                # else:
+                    # BankTransaction.objects.create(
+                        # trans_date=tdate,
+                        # trans_owner=c_user,
+                        # trans_amt = transaction_amount,
+                        # trans_msg = amt_desc_pair[2],
+                        # trans_category = bt[0].trans_category,
+                        # trans_group = bt[0].trans_group
+                        # )
+                    
+            # except:
+                # #this transaction needs to be categorized by user                
+                # try:
+                    # if credit_count > 2: #determine if a credit or debit
+                        # transaction_amount = '-' + amt_desc_pair[1]
+                    # else:
+                        # transaction_amount = amt_desc_pair[1]
+                    # trans_str = tdate + ' ' + transaction_amount + ' ' + amt_desc_pair[2]
+                    # incomplete_transactions.append(trans_str.strip())
+                # except:
+                    # msg = 'index error 2'
+        
+        
+    # return incomplete_transactions
          
       
-def process_transactions(bank_string, transaction_pattern):   
-    #data comes in as one long string which is split on date to format below    
-    #'200.00 AUTO XFER CREDIT DDA TRNSFR 0000 *****************80071',
-    #'387.01 DENVER PUBLIC SC PR PAYMENT ', '510.00 ONLINE XFER CR', etc. 
+# def process_transactions(bank_string, transaction_pattern):   
+    # #data comes in as one long string which is split on date to format below    
+    # #'200.00 AUTO XFER CREDIT DDA TRNSFR 0000 *****************80071',
+    # #'387.01 DENVER PUBLIC SC PR PAYMENT ', '510.00 ONLINE XFER CR', etc. 
     
-    transactions = re.split(r'(\d+/\d\d\s+)', bank_string)    
-    return transactions[1:]
+    # transactions = re.split(r'(\d+/\d\d\s+)', bank_string)    
+    # return transactions[1:]
     
    
    

@@ -1,48 +1,51 @@
 FinTrack v1.0 (FT1)
 
+Introduction
+
 One of the big incentives to take this course and learn Django and Javascript is to harness the power and flexibility of full stack programming. 
 What better way to spin out useful apps for everyday life. This application is in that spirit. It is a Financial Tracker. It simply records, tracks,
 and then displays back to the user, useful views of the user's finanaces. 
 
-Users can view historical transaction data by Month, Year, or over the entire lifetime of the applications use. Users can view see the information both
-in a table and pie chart or barchart. Users may add, delete, update, or view any transaction. Users can search for a transaction period.
+Users can view historical transaction data by Month, Year, or over the entire lifetime of the applications use. Users can view the information both
+in a table and in a pie or bar chart. Users may add, delete, update, or view any transaction. Users can specify a period to view transactions (delineated by month/year).
 
-One of the challenges of a application which relies on APIs provided by banks is that the exact  
-V1 is focused on personal financial tracking with plans to expand functionality to add flexibility at a
-later time.
-
-As a prototype, this application may be something of a stubb. Ideally, one would set up the application to interact with an API of the user's
-financial institution. The limitation here is the API endpoint's data and format are unknown to the author. As a proxy, and to allow for test
-data, an input page will allow the user to upload bank-statement like documents (which are also provided for the convenience of prototype users).
+One of the challenges of a application such as this is retrieving data from financial instituions. A bit of research shows that banks offer a number of different ways users
+can access their financial data. Some (but not all) institutions offer API's with which users can download the data. This would be the preferred access. However, many 
+smaller institutions rely on more universal low-tech solutions such a comma separated lists (CSV). The CSV seems to be the lowest common denominator. It is because of the format's 
+ubiquity that it was chosen as the primary method of automated data entry rather than creating some sort of mock API similar to the Project 3 (Mail). Of course, entries can be 
+added one by one but this is a very tedious chore. A sample CSV file is included in the project to be used for testing.
 
 Distintivity and Complexity Requirements
 
-
-1. Complexity and distinctiveness. 
-
-	It would be difficult to avoid all overlap with previous assignments when creating a application of this nature. However, a number of distinct 
-	features are presented in this application. To enumerate a few:
+It would be difficult to avoid all overlap with previous assignments when creating a application of this nature. However, a number of distinct 
+features are presented in this application. To enumerate a few:
+	
+	- Graphics 
+		The program features graphical components to help users to visual the data. These components are adaptations of a graphing library 
+		provided by Google Charts (https://developers.google.com/chart/). These components were fairly easy to incorporate and provide a way to
+		quickly evaluate the data presented. Users may toggle between a pie chart and a bar graph. The graphs and chart each had to accomodate a variety of views. It was necessary to make the visuals flexible enough to handle the 
+		size of the data set used to populate the graphic. For instance, a view in which the user can look at all bank transactions over the 
+		lifetime of their transactions had to be capable of displaying categories such that they were distiguishable from neighboring elements.
+		For this purpose, a bar graph that scales based on the number of transactions in the data set is provided (though the option to view 
+		the data via a pie chart is still available).
 		
-		- Graphics 
-			The program features graphical components to help users to visual the data. These components are adaptations of a graphing library 
-			provided by Google Charts (https://developers.google.com/chart/). These components were fairly easy to incorporate and provide a way to
-			quickly evaluate the data presented. Users may toggle between a pie chart and a bar graph. The graphs and chart each had to accomodate a variety of views. It was necessary to make the visuals flexible enough to handle the 
-			size of the data set used to populate the graphic. For instance, a view in which the user can look at all bank transactions over the 
-			lifetime of their transactions had to be capable of displaying categories such that they were distiguishable from neighboring elements.
-			For this purpose, a bar graph that scales based on the number of transactions in the data set is provided (though the option to view 
-			the data via a pie chart is still available).
-			
-		- Parsing
-			Text parsing using Python's regular expression library was employed to split apart the bank-statement like documents to extract the 
-			relevant financial data. In addition, a utility to upload documents is provides another distinction from previous projects.
-			
-		- Document Utility
-			Functionality to upload document for parsing.
-			
-		- Data Crunching
-			Django's built-in filters and functions were used more extensively. Calculating and presenting it to the user was done.
+	- Parsing
+		CSV parsing offered the opportunity to work with the built-in string manipulation library and explore Python's regex support. The design decision was to do the parsing 'in-house' rather
+		than use Python's CSV library mainly to allow exploration in Python's support for this type of programming.
+		
+	- Working with files
+		A utility to upload and save documents is provided
+		
+	- Document Utility
+		Functionality to upload document for parsing.
+		
+	- Data Crunching
+		Django's built-in filters and functions were used more extensively. Calculating and presenting it to the user was done.
 
-2. 	Files - Below are files created for this project in addition to files which were generated by the Django which contain significant
+
+Project Files 
+
+Below are files created for this project in addition to files which were generated by the Django which contain significant
 	modifications.
 	
 		proj5FinTracker/
