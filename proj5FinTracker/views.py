@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime, date
 from json import dumps
 
-from .models import User, BankTransaction
+from .models import User, BankTransaction, FileStorage
 from .forms import InputBankStatementForm, FindByDateForm, TransactionForm
 
 from pdfminer.converter import TextConverter
@@ -328,7 +328,31 @@ def vinput(request):
                      
 @csrf_exempt
 def vupload(request):    
+  
+    # def vupload(request):    
+  
+    # ###get text from PDF document###
+    # bf_str = StringIO()
+    # bf_open = request.FILES['file_name']
+    # bf_parser = PDFParser(bf_open)
+    # bf_doc = PDFDocument(bf_parser)
+    # bf_mgr = PDFResourceManager()
+    # bf_converter = TextConverter(bf_mgr, bf_str, laparams=LAParams())
+    # bf_interpreter = PDFPageInterpreter(bf_mgr, bf_converter)
+    # for bf_page in PDFPage.create_pages(bf_doc):
+        # bf_interpreter.process_page(bf_page)
     
+    
+    # transactions_needing_classification = parse_pdf_text(bf_str.getvalue(), request)
+    
+    # ibsForm = InputBankStatementForm()
+    # dmp = dumps(transactions_needing_classification)
+    # return render(request, "proj5FinTracker/input.html", {
+        # 'tform' : ibsForm,
+        # 'dmp': dmp  
+    # })
+  
+  
     ###parse CSV###
     
     ###parse PDF document###
@@ -343,14 +367,14 @@ def vupload(request):
         # for bf_page in PDFPage.create_pages(bf_doc):
             # bf_interpreter.process_page(bf_page)
         
-        # transactions_needing_classification = parse_pdf_text(bf_str.getvalue(), request)
+       # # transactions_needing_classification = parse_pdf_text(bf_str.getvalue(), request)
         
     # else:
-    
-    fs =  FileStorage()
-    fs.financial_doc  = bf_open
+        # transactions_needing_classification = parse_csv(bf_open, request)
+    fs = FileStorage()
+    fs.financial_doc = bf_open
     fs.save()
-    transactions_needing_classification = parse_csv(bf_open, request)    
+    transactions_needing_classification = parse_csv(bf_open, request)
     dmp = dumps(transactions_needing_classification)
     ibsForm = InputBankStatementForm()
     return render(request, "proj5FinTracker/input.html", {
@@ -364,85 +388,6 @@ def vupload(request):
 def get_user(request):
     return User.objects.get(username = request.session["current_user"])
   
-def parse_csv(csv_file, request):
-    #CSV Headings: Transaction Date,Check Number,Description,Debit Amount,Credit Amount
-    csv_str = str(csv_file.read())
-    #csv_strip = csv_str.strip()
-    csv_mod = re.sub('[\']', '', csv_str)
-    csv_list = csv_mod.split('\\r\\n')
-    
-    incomplete_transactions = []
-    c_user = get_user(request)
-    firstEntry = True
-    idate = 0
-    idesc = 0
-    idebit = 0
-    icredit = 0
-    
-    
-    for csv_entry in csv_list:
-        if firstEntry:
-            firstEntry = False
-            elem_count = 0
-            
-            #figure out which element is which in csv by using headings 
-            heading_elems = csv_entry.split(',')
-            for elems in heading_elems:
-                if elems.upper().find("DATE") != -1:
-                    idate = elem_count
-                if elems.upper().find("DESC") != -1:
-                    idesc = elem_count
-                if elems.upper().find("DEBIT") != -1:
-                    idebit = elem_count
-                if elems.upper().find("CREDIT") != -1:
-                    icredit = elem_count 
-                elem_count += 1
-            continue
-        
-        csv_elements = csv_entry.split(',')
-        split_date = csv_elements[idate].split('/')
-        
-        try:
-            tdate = split_date[2] + '-' + split_date[0] + '-' + split_date[1] 
-            tdesc = re.sub('^\d+', '', csv_elements[idesc]) # mark dates
-            tdebit = float(csv_elements[idebit]) * -1
-            tcredit = float(csv_elements[icredit])
-        except:
-            continue
-                
-        try: 
-            #do we have transaction with the same desc...
-            bt = BankTransaction.objects.filter(
-                    trans_owner=c_user,
-                    trans_msg = tdesc
-                    )         
-            #we have everything we need to save the transaction
-            tcat = bt.first().trans_category
-            tgroup = bt.first().trans_group
-            for btransaction in bt:
-                    if  tdebit == btransaction.trans_amt or tcredit == btransaction.trans_amt:
-                        duplicate = True
-                        break                        
-             
-            if duplicate:
-                continue
-                        
-            BankTransaction.objects.create(
-                        trans_date=tdate,
-                        trans_owner=c_user,
-                        trans_amt = tdebit if (tdebit != 0) else tcredit,
-                        trans_msg = tdesc,
-                        trans_category = tcat,
-                        trans_group = tgroup
-                        )
-                        
-        except:
-            #...or does the transaction need to be classified
-            trans_str = tdate + ' ' + "{:.2f}".format(tdebit if (tdebit != 0) else tcredit) + ' ' + tdesc
-            incomplete_transactions.append(trans_str.strip())
-                        
-    return incomplete_transactions
-
   
 # def parse_pdf_text(pdf_text, request):
     
@@ -577,15 +522,94 @@ def parse_csv(csv_file, request):
         
         
     # return incomplete_transactions
+
+def parse_csv(csv_file, request):
+    #CSV Headings: Transaction Date,Check Number,Description,Debit Amount,Credit Amount
+    csv_str = str(csv_file.read())
+    #csv_strip = csv_str.strip()
+    csv_mod = re.sub('[\']', '', csv_str)
+    csv_list = csv_mod.split('\\r\\n')
+    
+    incomplete_transactions = []
+    c_user = get_user(request)
+    firstEntry = True
+    idate = 0
+    idesc = 0
+    idebit = 0
+    icredit = 0
+    
+    
+    for csv_entry in csv_list:
+        if firstEntry:
+            firstEntry = False
+            elem_count = 0
+            
+            #figure out which element is which in csv by using headings 
+            heading_elems = csv_entry.split(',')
+            for elems in heading_elems:
+                if elems.upper().find("DATE") != -1:
+                    idate = elem_count
+                if elems.upper().find("DESC") != -1:
+                    idesc = elem_count
+                if elems.upper().find("DEBIT") != -1:
+                    idebit = elem_count
+                if elems.upper().find("CREDIT") != -1:
+                    icredit = elem_count 
+                elem_count += 1
+            continue
+        
+        csv_elements = csv_entry.split(',')
+        split_date = csv_elements[idate].split('/')
+        
+        try:
+            tdate = split_date[2] + '-' + split_date[0] + '-' + split_date[1] 
+            tdesc = re.sub('^\d+', '', csv_elements[idesc]) # mark dates
+            tdebit = float(csv_elements[idebit]) * -1
+            tcredit = float(csv_elements[icredit])
+        except:
+            continue
+                
+        try: 
+            #do we have transaction with the same desc...
+            bt = BankTransaction.objects.filter(
+                    trans_owner=c_user,
+                    trans_msg = tdesc
+                    )         
+            #we have everything we need to save the transaction
+            tcat = bt.first().trans_category
+            tgroup = bt.first().trans_group
+            for btransaction in bt:
+                    if  tdebit == btransaction.trans_amt or tcredit == btransaction.trans_amt:
+                        duplicate = True
+                        break                        
+             
+            if duplicate:
+                continue
+                        
+            BankTransaction.objects.create(
+                        trans_date=tdate,
+                        trans_owner=c_user,
+                        trans_amt = tdebit if (tdebit != 0) else tcredit,
+                        trans_msg = tdesc,
+                        trans_category = tcat,
+                        trans_group = tgroup
+                        )
+                        
+        except:
+            #...or does the transaction need to be classified
+            trans_str = tdate + ' ' + "{:.2f}".format(tdebit if (tdebit != 0) else tcredit) + ' ' + tdesc
+            incomplete_transactions.append(trans_str.strip())
+                        
+    return incomplete_transactions
          
       
-# def process_transactions(bank_string, transaction_pattern):   
-    # #data comes in as one long string which is split on date to format below    
-    # #'200.00 AUTO XFER CREDIT DDA TRNSFR 0000 *****************80071',
-    # #'387.01 DENVER PUBLIC SC PR PAYMENT ', '510.00 ONLINE XFER CR', etc. 
+def process_transactions(bank_string, transaction_pattern):   
+    #data comes in as one long string which is split on date to format below    
+    #'200.00 AUTO XFER CREDIT DDA TRNSFR 0000 *****************80071',
+    #'387.01 DENVER PUBLIC SC PR PAYMENT ', '510.00 ONLINE XFER CR', etc. 
     
-    # transactions = re.split(r'(\d+/\d\d\s+)', bank_string)    
-    # return transactions[1:]
+    transactions = re.split(r'(\d+/\d\d\s+)', bank_string)    
+    return transactions[1:]
     
    
    
