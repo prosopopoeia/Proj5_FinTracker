@@ -2,37 +2,40 @@ FinTrack v1.0 (FT1)
 
 Introduction
 
-One of the big incentives to take CS50's Web Programming is to harness the power and flexibility of Django and Javascript blended together. 
-What better way to spin out useful apps for everyday life. This application is the first of many which is a product of that philosophy. 
-It is a Financial Tracker. It simply records, tracks, and then displays back to the user, useful views of the user's finanaces. 
+One of the big incentives to learn web programming is to harness the flexibility and power to quickly spin out useful apps for everyday life. 
+This application is a product of that philosophy.  It is a Financial Tracker. It simply records, tracks, and then displays back to the user, useful views of the user's finanaces. 
 
 Users can view historical transaction data by Month, Year, or over the entire lifetime of the applications use. Users can view the information both
 in a table and in a pie or bar chart. Users may add, delete, update, or view any transaction. Users can specify a period to view transactions (delineated by month/year).
 
-One of the challenges of a application such as this is retrieving data from financial instituions. A bit of research shows that banks offer a number of different ways users
-can access their financial data. Some (but not all) institutions offer API's with which users can download the data. This would be the preferred access. However, many 
-smaller institutions rely on more universal low-tech solutions such a comma separated lists (CSV). The CSV seems to be the lowest common denominator. It is because of the format's 
-ubiquity that it was chosen as the primary method of automated data entry rather than creating some sort of mock API similar to the Project 3 (Mail). Of course, entries can be 
-added one by one (but a very tedious chore). A sample CSV file is included in the project to be used for testing.
+
+Note on Data Entry
+
+One of the challenges of a application such as this is retrieving data from financial instituions. After a bit of research, it is apparent that banks offer a number of varied ways users
+can access their financial data. Some (but of course, not all) institutions offer API's with which users can download the data. This would be the preferred access. However, many 
+smaller institutions rely on more universal low-tech solutions such a comma separated lists (CSV). The CSV seems to be the lowest common denominator. It is because the format is the
+most widespread that was chosen as the primary way to get the data into the database. This was prefferable to creating some sort of mock API similar to the Project 3 (Mail). 
+In addition, transactions can be added one by one. A sample CSV file is included in the project to be used for testing.
+
 
 Distintivity and Complexity Requirements
 
 It would be difficult to avoid all overlap with previous assignments when creating a application of this nature. However, a number of distinct 
-features are presented in this application. To enumerate a few:
+features are presented in this application. Some examples:
 	
 	- Graphics 
-		The program features graphical components to help users to visual the data. These components are adaptations of a graphing library provided by Google Charts 
-		(https://developers.google.com/chart/). These components were fairly easy to incorporate and provide a way to	quickly evaluate the data presented. Users may toggle between 
-		a pie chart and a bar graph. The graphs and chart each had to accomodate a variety of views. It was necessary to make the visuals flexible enough to handle the 
-		size of the data sets. For instance, a view in which the user can look at all bank transactions over the lifetime of the use of the application had to be 
-		capable of displaying categories such that they were distiguishable from neighboring elements. For this purpose, a bar graph that scales based on the number of transactions in 
-		the data set is provided (though the option to view the data via a pie chart is still available).
+		The program features graphical components to help visualize the data. These components are adaptations of a graphing library provided by Google Charts 
+		(https://developers.google.com/chart/). These components required a bit of customization to get them to respond in the desired way. Users may toggle between a pie chart and a bar 
+		graph. The graph and chart each had to scale to accomodate a variety of time periods. For instance, a view in which the user can look at all bank transactions over the lifetime of 
+		the use of the application had to be capable of displaying categories such that they were distiguishable from neighboring elements. For this purpose, a bar graph that scales based 
+		on the number of transactions in the data set is provided (though the option to view the data via a pie chart is still available).
 		
 	- Parsing
 		CSV parsing offered the opportunity to work with Python's built-in string library and regex support. 
 		
 	- Working with files
 		A utility to upload and save documents is provided. Files are collected in a local directory to serve as a financial document repository.
+
 
 Project Files 
 
@@ -72,19 +75,19 @@ Below are files created for this project in addition to files which were generat
 				
 3. How to install/run
 	Windows:
-	- clone repository to a local folder
-	- open command line in newly created folder
+	- clone repository to a local directory
+	- open command line in newly created directory/repository
 	- retrieve dependencies
-		type 'pip install -r requirements.txt' at the prompt
+		enter, 'pip install -r requirements.txt' at the prompt
 	- initialize the DB - enter the following commands:
-		type 'python manage.py makemigrations'
-		and  'python manage.py migrate'
+		enter, 'python manage.py makemigrations'
+		followed by,  'python manage.py migrate'
 	- create a local admin
-		type 'python manage.py createsuperuser'
+		enter, 'python manage.py createsuperuser'
 	- start server
-		type 'python manage.py runserver'
+		enter, 'python manage.py runserver'
 		
-	navigate to http://127.0.0.1:8000 and register as a user
+	- navigate to http://127.0.0.1:8000 and register as a user
 		
 				
 		
