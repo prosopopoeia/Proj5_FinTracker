@@ -9,15 +9,12 @@ urlpatterns = [
     path("register", views.vregister, name="vregister"),
     path("vinput", views.vinput, name="vinput"),
     path("vupload", views.vupload, name="vupload"),
-    path("vupdateEntry", views.vupdateEntry, name="vupdateEntry"),
+    path("vupdateEntry", views.vupdateEntry, name="vupdateEntry"),          
     path("vmonth", views.vmonth, name="vmonth"),
     path("vyear", views.vyear, name="vyear"),
-    ####    #path("veditEntry", views.veditEntry, name="veditEntry"),#################
     path("jsvmonth", views.jsvmonth, name="jsvmonth"),
     path("jsvcat", views.jsvcat, name="jsvcat"),
     path("edittransaction", views.edittransaction, name="edittransaction"),
-    ####    #path("tranByDate", views.tranByDate, name="tranByDate"),##################
     path("jsvdelete", views.jsvdelete, name="jsvdelete"),
     path("jsvsave", views.jsvsave, name="jsvsave"),
-    ####    #path("jstotals", views.jstotals, name="jstotals"),
 ]

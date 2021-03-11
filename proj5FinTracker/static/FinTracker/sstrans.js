@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	var addTransDiv = document.querySelector("#add-trans");
 	addTransDiv.style.display = 'none';
-	
-////console.log("domcontent loading");
-	
+
 	var addTransactionButton = document.querySelector('#add-trans-button');	
 	addTransactionButton.addEventListener('click', () => showAddTransaction());
 	
@@ -35,17 +33,18 @@ document.addEventListener('DOMContentLoaded', function() {
 	var chartViewBtn = document.querySelector("#chart-view-btn");
 	chartViewBtn.addEventListener('click', changeChart);
 	chartViewBtn.innerHTML = "Bar Graph";
-	console.log(`load chrtview: ${chartViewBtn.innerHTML}`);
 	
 });//end addEventListener
 
 const column = {
+	
 	CAT: 1,
 	GRP: 2,
 	MSG: 3	
 };
 
 const jperiod = {
+	
 	DAY:   1, 
 	MONTH: 2, 
 	YEAR:  3, 
@@ -57,8 +56,8 @@ const chartType = {
 	BAR: 2
 }
 
-function getTextMonth(month_ord) {
-    
+function getTextMonth(month_ord) {  
+
     months =   ["January",
                 "February",
                 "March",
@@ -107,8 +106,6 @@ function loadYear() {
 	displayDate.innerHTML = yr;
 	
 	document.querySelector('#add-form-group').style.display = 'none';
-	
-/////console.log(`inner.value: ${displayDate.innerHTML.value}, diplayDate.ivalue: ${displayDate.value}`);
 }
 
 function loadEpoch() {	
@@ -129,12 +126,9 @@ function loadEpoch() {
 
 function loadTable(pdate = 0, period = jperiod.MONTH, ctype = chartType.PIE) {
 	
-	console.log(`loadTable ctype before ${ctype} period: ${period}`);
 	if (isNaN(ctype))
-		ctype = chartType.PIE;
+		ctype = chartType.PIE;	
 	
-	console.log(`loadTable ctype after ${ctype} period: ${period}`);
-	//document.querySelector('#target').innerHTML = "";
 	fetch('jsvmonth', {
 		method: 'POST',
 		body: JSON.stringify({
@@ -144,8 +138,6 @@ function loadTable(pdate = 0, period = jperiod.MONTH, ctype = chartType.PIE) {
 	})
 	.then(response => response.json())
 	.then(transactions => {
-		//console.log('loading table then statements...');
-		//console.log(transactions);
 		transactions.forEach(displayTrans);		
 		createChart(transactions, ctype);
 		var displayDate = document.querySelector('#date-span');
@@ -163,6 +155,7 @@ function loadTable(pdate = 0, period = jperiod.MONTH, ctype = chartType.PIE) {
 }
 
 function clearAllCharts() {
+	
 	//clear current views: table, summary table, pie chart
 	transTable = document.querySelector('#target');
 	transTable.innerHTML = "";
@@ -177,6 +170,7 @@ function clearAllCharts() {
 }
 
 function setNavBar(navitem) {
+	
 	document.querySelector('#navmonth').removeAttribute("class");
 	document.querySelector('#navyear').removeAttribute("class");
 		
@@ -186,6 +180,7 @@ function setNavBar(navitem) {
 }
 
 function showAddTransaction() {
+	
 	var addTransDiv = document.querySelector("#add-trans");
 	var addTransButton  = document.querySelector('#add-trans-button');
 	var saveTram = document.querySelector('#add-btn');
@@ -198,6 +193,7 @@ function showAddTransaction() {
 }
 
 function addTransaction(event) {
+	
 	event.preventDefault();
 	fetch('jsvsave', {
 		method: 'POST',
@@ -218,7 +214,6 @@ function addTransaction(event) {
 		tableContents.innerHTML = '';
 		
 		tdate = document.querySelector('#dte').value;
-		console.log(`tdate in addTransaction function: ${tdate}`);
 		
 		//on return, display month view and pie chart regardless of previous view
 		loadTable(tdate, jperiod.MONTH);
@@ -232,13 +227,11 @@ function addTransaction(event) {
 }	
 
 function displayDataDate (dateValue) {
+	
 	//get date from text box - we are doing a search by date
-	//console.log("displayDataDate");
 	if (!dateValue) {
 		dateValue = document.querySelector("#bydate").value;
-		//console.log("in first check");
 	}
-	//console.log(dateValue);
 	var yyyy = 0;
 	var mm = 0;
 	//nothing passed in, nothing in text box, we are just doing a default date (today)
@@ -246,27 +239,21 @@ function displayDataDate (dateValue) {
 		var today = new Date();
 		mm = ((today.getMonth() + 1) < 10) ? "0" + (today.getMonth() + 1) : today.getMonth() + 1; //January is 0 
 		yyyy = today.getFullYear();
-		//console.log("in 2nd check");
-		//console.log(`mm: ${mm}, yyyy: ${yyyy}`);
 		dateValue = "" + yyyy + "-" + mm;
 	}
 	else {
 		mm = dateValue.slice(5,7);
 		yyyy = dateValue.substr(0,4)
 	}
-	//console.log(`datevalue: ${dateValue}`);
 	var ds = document.querySelector('#date-span');
-	
-	//console.log(`(displaydate function) month section ${mm}`);
 	monthText = getTextMonth(mm);
 	
 	dsDate = (inYearView()) ? `All ${yyyy} transactions` : (inEpochView()) ? "Since the beginning of Time" : `${monthText} ${yyyy}`;
-	//console.log(`dsDate is: ${dsDate}`);
 	ds.innerHTML = dsDate;
-	console.log(`end: ${dateValue}`);
 }
 
 function findTransactionsByDate(event) {
+	
 	event.preventDefault();
 
 	dateElem = document.querySelector('#bydate');
@@ -274,12 +261,10 @@ function findTransactionsByDate(event) {
 	if (!dateValue) {
 		dateValue = 0;
 	}
-	console.log(`findTransByDate... date is: ${dateValue}`);
 	displayDataDate(dateValue);
 	var tranCount = 0;
 	
 	let currtype = (inYearView()) ? jperiod.YEAR : (inEpochView()) ? jperiod.ALL : jperiod.MONTH;
-	console.log(`currtype is : ${currtype}, dateVaule is ${dateValue}`);
 	fetch('jsvmonth', {
 		method: 'POST',
 		body: JSON.stringify({
@@ -300,6 +285,7 @@ function findTransactionsByDate(event) {
 }
 
 function deleteTran(tranID) {
+	
 	if (confirm('are you sure you want to delete transaction?'))
 	{
 		fetch('jsvdelete', {
@@ -309,29 +295,12 @@ function deleteTran(tranID) {
 			})
 		})
 		.then(response => response.json())
-		.then(result => {
-			
+		.then(result => {			
 			var deletedRow = document.querySelector(`#row${tranID}`);
 			deletedRow.remove();
 			var tableContents = document.querySelector('#target');	
-			tableContents.innerHTML = '';
-			
-			changeChart();
-			
-			//if val year button is active (i.e.val is not null) treat as year
-			// if (inYearView()) {
-				// yr = document.querySelector('#date-span').innerHTML.substring(4,8);
-				// console.log(` yr is ${yr}`);
-				// loadTable(yr.concat("/11/11"),jperiod.YEAR);
-			// }
-			// else {
-				// //if we are looking at a view other than the default (i.e. this month)
-				// var dateValue = document.querySelector("#bydate").value;
-				// if (dateValue)
-					// loadTable(dateValue, jperiod.MONTH);
-				// else //default to today
-					// loadTable();
-			// }
+			tableContents.innerHTML = '';			
+			changeChart();			
 		});		
 	}	
 }
@@ -427,8 +396,7 @@ function displayTrans(transaction) {
 
 	///category////
 	
-	var tran_cat_val = transaction['trans_category'];
-	
+	var tran_cat_val = transaction['trans_category'];	
 	var td4 = document.createElement('td');
 	var div4 = document.createElement('div');
 	div4.innerHTML = tran_cat_val;
@@ -446,8 +414,7 @@ function displayTrans(transaction) {
 
 	///group///
 	
-	var tran_group_val = transaction['trans_group'];
-	
+	var tran_group_val = transaction['trans_group'];	
 	var td5 = document.createElement('td');
 	var div5 = document.createElement('div');
 	div5.innerHTML = tran_group_val;
@@ -476,6 +443,7 @@ function displayTrans(transaction) {
 }
 
 function catView(data,COLUMN_TYPE, ctype = chartType.PIE ) {
+	
 	var catAmtTotal = 0;
 	var catCount = 0;
 	var catData = 0, grpData = 0;
@@ -497,7 +465,6 @@ function catView(data,COLUMN_TYPE, ctype = chartType.PIE ) {
 		catData = 0;
 	}
 	grpHeading.innerHTML = "Viewing: " + data +  " " + catType;
-	console.log(`sentence is ${data} ${catType}`);
 	if (inYearView())
 		periodType = jperiod.YEAR;
 	else if (inEpochView())
@@ -516,8 +483,6 @@ function catView(data,COLUMN_TYPE, ctype = chartType.PIE ) {
 	})
 	.then(response => response.json())
 	.then(transactions => {
-		//console.log(transactions[catCount]['trans_amt']);
-		
 		var transRows = document.querySelector('#target');
 		var amount = 0;
 		transRows.innerHTML = "";
@@ -533,11 +498,10 @@ function catView(data,COLUMN_TYPE, ctype = chartType.PIE ) {
 function editTran(tranID) {
 	
 	document.querySelector(`#editbutton${tranID}`).style.display = 'none';
-
 	var saveButton = document.createElement('button');
 	saveButton.innerHTML = "save";
 	
-///////saveEdit ///////////////////////
+	///////saveEdit ///////////////////////
 	var sbuttonClickAttr = document.createAttribute('onClick');
 	sbuttonClickAttr.value = `saveEdit(${tranID})`;
 	saveButton.setAttributeNode(sbuttonClickAttr);
@@ -550,7 +514,7 @@ function editTran(tranID) {
 	sbuttonClickAttr3.value = `btn btn-primary btn-block btn-xs`;
 	saveButton.setAttributeNode(sbuttonClickAttr3);
 	
-///--create cancel button--//		
+	///--create cancel button--//		
 	var cancelButton = document.createElement('button');
 	cancelButton.innerHTML = "cancel";
 		
@@ -566,12 +530,12 @@ function editTran(tranID) {
 	cbuttonClickAttr4.value = `returnToDisplayView(${tranID})`;
 	cancelButton.setAttributeNode(cbuttonClickAttr4);	
 	
-//--display button in date column & remove 'click-to-edit' property--//
+	//--display button in date column & remove 'click-to-edit' property--//
 	var editColumn = document.querySelector(`#editcolumn${tranID}`);
 	editColumn.append(saveButton);
 	editColumn.append(cancelButton);		
 	
-//--get contents of each column/field in row--//
+	//--get contents of each column/field in row--//
 	var dateColumn = document.querySelector(`#date${tranID}`);
 	var msgColumn = document.querySelector(`#msg${tranID}`);
 	var amtColumn =  document.querySelector(`#amt${tranID}`);
@@ -583,7 +547,7 @@ function editTran(tranID) {
 	var existingCat = catColumn.innerHTML;
 	var existingGroup = groupColumn.innerHTML;
 	
-//--create text boxes to allow for editing--//
+	//--create text boxes to allow for editing--//
 	var dateTextBox = document.createElement('textArea');
 	var msgTextBox = document.createElement('textArea');
 	var amtTextBox = document.createElement('textArea');
@@ -638,6 +602,7 @@ function editTran(tranID) {
 }
 
 function saveEdit(tranID) {	
+
 	document.querySelector(`#editbutton${tranID}`).style.display = 'block';
 	tdate = document.querySelector(`#date${tranID} > textarea`).value;
 	tamt = document.querySelector(`#amt${tranID} > textarea`).value;
@@ -663,18 +628,15 @@ function saveEdit(tranID) {
 			
 			const submitEvent = new SubmitEvent("submit");			
 			changeChart();
-			//findTrans---ByDate(submitEvent);
-			console.log("saveEdit: reload path");
 		}
 		else {
 			returnToDisplayView(tranID);
-			console.log("saveEdit: no reload path");
 		}
 	});
 }
 
 function returnToDisplayView(tranID) {	
-	console.log("ret to display view");
+
 	tdate = document.querySelector(`#date${tranID} > textarea`).value;
 	tamt = document.querySelector(`#amt${tranID} > textarea`).value;
 	tcat = document.querySelector(`#category${tranID} > textarea`).value;
@@ -713,6 +675,7 @@ function returnToDisplayView(tranID) {
 }
 
 function createCatbyMonthChart(transactions, periodType=0, ctype = chartType.PIE) {
+	
 	var creditMap = new Object();
 	var debitMap = new Object();
 	var dtotal = 0;
@@ -723,7 +686,6 @@ function createCatbyMonthChart(transactions, periodType=0, ctype = chartType.PIE
 	if (periodType == jperiod.MONTH) {
 		while (tran = transactions[tranCount++]) {		
 			var tDate = tran['trans_date'];	
-			console.log(`tdate: ${tDate}`);
 			var tAmount = parseFloat(tran['trans_amt']);		
 
 			//credits
@@ -752,9 +714,6 @@ function createCatbyMonthChart(transactions, periodType=0, ctype = chartType.PIE
 		while (tran = transactions[tranCount++]) {		
 			var iDate = tran['trans_date'];
 			var tDate = getTextMonth(parseInt(iDate.substring(5,7))) + " " + iDate.substring(0,4);
-			//tDate = tDate.substring(0,7);
-			
-			//console.log(`tdate: ${tDate}`);
 			var tAmount = parseFloat(tran['trans_amt']);		
 			//credits
 			if (tAmount > 0) {
@@ -784,8 +743,6 @@ function createCatbyMonthChart(transactions, periodType=0, ctype = chartType.PIE
 	populateCharts(debitMap, creditMap, dtotal, ctotal, ctype);
 	var savingsDiv = document.querySelector('#amt-saved');
 	savingsDiv.style.display = 'none';
-	console.log("via createbyCat");
-	
 }
 
 function createChart(transactions, ctype = chartType.PIE) {
@@ -824,11 +781,11 @@ function createChart(transactions, ctype = chartType.PIE) {
 	}
 	var savingsDiv = document.querySelector('#amt-saved');
 	savingsDiv.style.display = 'block';
-	console.log("via createbydates");
 	populateCharts(debitMap, creditMap, dtotal, ctotal, ctype);
 }	
 
 function populateCharts(debitMap, creditMap, dtotal, ctotal, ctype = chartType.PIE) {
+	
 	var debitRows = document.querySelector('#debit-overview');
 	debitRows.innerHTML = "";
 	var creditRows = document.querySelector('#credit-overview');
@@ -861,7 +818,6 @@ function populateCharts(debitMap, creditMap, dtotal, ctotal, ctype = chartType.P
 	var savingsDiv = document.querySelector('#amt-saved');
 	var totsaved = ctotal - dtotal;
 	savingsDiv.innerHTML = `Total Savings: ${totsaved.toFixed(2)}`;
-	console.log(`ctot: ${ctotal}, dtot ${dtotal}, totes: ${totsaved}`);
 }
 
 function populateSummaryTable(tranMap, summaryElement) {
@@ -880,24 +836,21 @@ function populateSummaryTable(tranMap, summaryElement) {
 			tr1.append(td0);
 			tr1.append(td1);
 			summaryElement.append(tr1);	
-			//console.log(`key: ${key}, val: ${value}`);
 		}	
 }
 
-// Draw the chart and set the chart values
 function drawChart(tranMap, outerElement, tcount, ctype = chartType.PIE) {
+		
+	// Draw the chart and set the chart values
 	kk = Object.keys(tranMap);
-	console.log(`map: ${kk}, tcount ${tcount}`);
 	var chartData = buildList(tranMap);
 	var data = google.visualization.arrayToDataTable(chartData);
 	let scaledHeight = 800;
 	if (ctype == chartType.PIE) {
 		var chart = new google.visualization.PieChart(outerElement); 
-		console.log("pie");
 	}
 	else {//bar chart
 		var chart = new google.visualization.BarChart(outerElement); 
-		console.log("bar");
 		scaledHeight = 50 * tcount;	
 	}
 	var options = { 
@@ -908,9 +861,9 @@ function drawChart(tranMap, outerElement, tcount, ctype = chartType.PIE) {
 }  
 
 function buildList(imap) {
-	var tranMapKeys = Object.keys(imap);
 	
-	var returnList = [["Title", "Summary"]];////////////////////TBD////////////
+	var tranMapKeys = Object.keys(imap);	
+	var returnList = [["Title", "Summary"]];
 	for (k of tranMapKeys) {		
 		var kv = [k , imap[k]];
 		returnList.push(kv);
@@ -919,21 +872,20 @@ function buildList(imap) {
 }
 
 function changeChart() {
+	
 	var chartViewBtn = document.querySelector("#chart-view-btn");
 	var stateIndicator = chartViewBtn.innerHTML;
 	
-	console.log(`changeChart,stateIndicator: ${stateIndicator}`);
 	let ctype = chartType.PIE;
+	
 	//Chart in Pie state if stateIndicator == bar graph
 	if (stateIndicator == "Bar Graph") {
 		chartViewBtn.innerHTML = "Pie Graph";
-		ctype = chartType.BAR;		
-		console.log("barbranch");
+		ctype = chartType.BAR;
 	}
 	else {		
 		chartViewBtn.innerHTML = "Bar Graph";
 		ctype = chartType.PIE;
-		console.log("piebranch");
 	}
 	
 	var cat_grpDiv = document.querySelector('#cat-grp');
@@ -943,7 +895,7 @@ function changeChart() {
 	//using cat_grp div to indicate if we are looking at a category view or by month view
 	//this will tell us which function to use to populate our graphic
 	if (cat_grpDiv.style.display == 'none') {
-		//not displayed -> in non-category view
+		//not displayed -> in non-category view	
 		
 		if(inYearView()) {			
 			var displayDate = document.querySelector('#date-span');
@@ -955,27 +907,17 @@ function changeChart() {
 		}
 		else if (inEpochView()) {
 			loadTable(0, jperiod.ALL, ctype);
-			console.log(`loadeposh ${ctype}`);
 		}
 		else {
 			var dateOrDefaultToZero = 0;
 			
-			if (dateElem = document.querySelector('#bydate').value) {
-				//var tdate1 = dateElem;
-				//console.log(`tdate1: ${tdate1} `);
-								
-				dateOrDefaultToZero = dateElem.replace(/-/g, "/");				
-				console.log(`dateOrDefaultToZero: ${dateOrDefaultToZero} ++ ${dateElem}`);
+			if (dateElem = document.querySelector('#bydate').value) {				
+				dateOrDefaultToZero = dateElem.replace(/-/g, "/");					
 			}
-			loadTable(dateOrDefaultToZero,jperiod.MONTH,ctype);
-			console.log(`loadtable ${ctype}`);
-		}
-		console.log('in the cat_grpDiv branch');
+			loadTable(dateOrDefaultToZero,jperiod.MONTH,ctype);			
+		}		
 	}
 	else {
-		catView(msgs[1], (msgs[2] == "group") ? column.GRP : column.CAT, ctype);
-		console.log(`catview ${ctype}`);
+		catView(msgs[1], (msgs[2] == "group") ? column.GRP : column.CAT, ctype);		
 	}
-	console.log("endof changeChart");
-	
 }

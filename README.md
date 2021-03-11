@@ -2,9 +2,9 @@ FinTrack v1.0 (FT1)
 
 Introduction
 
-One of the big incentives to take this course and learn Django and Javascript is to harness the power and flexibility of full stack programming. 
-What better way to spin out useful apps for everyday life. This application is in that spirit. It is a Financial Tracker. It simply records, tracks,
-and then displays back to the user, useful views of the user's finanaces. 
+One of the big incentives to take CS50's Web Programming is to harness the power and flexibility of Django and Javascript blended together. 
+What better way to spin out useful apps for everyday life. This application is the first of many which is a product of that philosophy. 
+It is a Financial Tracker. It simply records, tracks, and then displays back to the user, useful views of the user's finanaces. 
 
 Users can view historical transaction data by Month, Year, or over the entire lifetime of the applications use. Users can view the information both
 in a table and in a pie or bar chart. Users may add, delete, update, or view any transaction. Users can specify a period to view transactions (delineated by month/year).
@@ -13,7 +13,7 @@ One of the challenges of a application such as this is retrieving data from fina
 can access their financial data. Some (but not all) institutions offer API's with which users can download the data. This would be the preferred access. However, many 
 smaller institutions rely on more universal low-tech solutions such a comma separated lists (CSV). The CSV seems to be the lowest common denominator. It is because of the format's 
 ubiquity that it was chosen as the primary method of automated data entry rather than creating some sort of mock API similar to the Project 3 (Mail). Of course, entries can be 
-added one by one but this is a very tedious chore. A sample CSV file is included in the project to be used for testing.
+added one by one (but a very tedious chore). A sample CSV file is included in the project to be used for testing.
 
 Distintivity and Complexity Requirements
 
@@ -21,27 +21,18 @@ It would be difficult to avoid all overlap with previous assignments when creati
 features are presented in this application. To enumerate a few:
 	
 	- Graphics 
-		The program features graphical components to help users to visual the data. These components are adaptations of a graphing library 
-		provided by Google Charts (https://developers.google.com/chart/). These components were fairly easy to incorporate and provide a way to
-		quickly evaluate the data presented. Users may toggle between a pie chart and a bar graph. The graphs and chart each had to accomodate a variety of views. It was necessary to make the visuals flexible enough to handle the 
-		size of the data set used to populate the graphic. For instance, a view in which the user can look at all bank transactions over the 
-		lifetime of their transactions had to be capable of displaying categories such that they were distiguishable from neighboring elements.
-		For this purpose, a bar graph that scales based on the number of transactions in the data set is provided (though the option to view 
-		the data via a pie chart is still available).
+		The program features graphical components to help users to visual the data. These components are adaptations of a graphing library provided by Google Charts 
+		(https://developers.google.com/chart/). These components were fairly easy to incorporate and provide a way to	quickly evaluate the data presented. Users may toggle between 
+		a pie chart and a bar graph. The graphs and chart each had to accomodate a variety of views. It was necessary to make the visuals flexible enough to handle the 
+		size of the data sets. For instance, a view in which the user can look at all bank transactions over the lifetime of the use of the application had to be 
+		capable of displaying categories such that they were distiguishable from neighboring elements. For this purpose, a bar graph that scales based on the number of transactions in 
+		the data set is provided (though the option to view the data via a pie chart is still available).
 		
 	- Parsing
-		CSV parsing offered the opportunity to work with the built-in string manipulation library and explore Python's regex support. The design decision was to do the parsing 'in-house' rather
-		than use Python's CSV library mainly to allow exploration in Python's support for this type of programming.
+		CSV parsing offered the opportunity to work with Python's built-in string library and regex support. 
 		
 	- Working with files
-		A utility to upload and save documents is provided
-		
-	- Document Utility
-		Functionality to upload document for parsing.
-		
-	- Data Crunching
-		Django's built-in filters and functions were used more extensively. Calculating and presenting it to the user was done.
-
+		A utility to upload and save documents is provided. Files are collected in a local directory to serve as a financial document repository.
 
 Project Files 
 
@@ -58,6 +49,7 @@ Below are files created for this project in addition to files which were generat
 			models.py	
 				BankTransaction - model to hold a financial transaction from a bank
 				User - model to hold user information
+				FileStorage - bank documents in CSV format
 			
 			urls.py
 				url mapping
@@ -73,18 +65,25 @@ Below are files created for this project in addition to files which were generat
 				singlePageTransactions.html - main container for the application
 			
 		proj5FinTracker/static/proj5FinTracker
-			input.js - JS code to upload documents and call pdf parsing functions
-			sstrans.js - JS code to support single page application - main functionality in this files
+			input.js: 	JS code to upload documents and call csv parsing functions
+			sstrans.js:	JS code to support single page application - this file is the heart of the front end of the project.
+						This file keeps track of displaying views, handles graphics, and provides interfaces to the backend.
+			
 				
 3. How to install/run
 	Windows:
-	clone repository to a local folder
-	open command line in newly created folder
-	make migrations - enter the following commands:
-		python manage.py makemigrations
-		python manage.py migrate
-	start server
-		python manage.py runserver
+	- clone repository to a local folder
+	- open command line in newly created folder
+	- retrieve dependencies
+		type 'pip install -r requirements.txt' at the prompt
+	- initialize the DB - enter the following commands:
+		type 'python manage.py makemigrations'
+		and  'python manage.py migrate'
+	- create a local admin
+		type 'python manage.py createsuperuser'
+	- start server
+		type 'python manage.py runserver'
+		
 	navigate to http://127.0.0.1:8000 and register as a user
 		
 				
