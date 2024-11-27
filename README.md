@@ -13,12 +13,12 @@ Note on Data Entry
 
 One of the challenges of a application such as this is retrieving data from financial instituions. After a bit of research, it is apparent that banks offer a number of varied ways users
 can access their financial data. Some (but of course, not all) institutions offer API's with which users can download the data. This would be the preferred access. However, many 
-smaller institutions rely on more universal low-tech solutions such a comma separated lists (CSV). The CSV seems to be the lowest common denominator. It is because the format is the
-most widespread that was chosen as the primary way to get the data into the database. This was prefferable to creating some sort of mock API similar to the Project 3 (Mail). 
+smaller institutions rely on more universal low-tech solutions such a comma separated lists (CSV). Since CSV is the
+most widespread format for sharing/downloading transactions, it has been chosen as the primary avenue to load data into the database. This was prefferable to creating some sort of mock API similar to the Project 3 (Mail). 
 In addition, transactions can be added one by one. A sample CSV file is included in the project to be used for testing.
 
 
-Distintivity and Complexity Requirements
+Distinction and Complexity Requirements
 
 It would be difficult to avoid all overlap with previous assignments when creating a application of this nature. However, a number of distinct 
 features are presented in this application. Some examples:
